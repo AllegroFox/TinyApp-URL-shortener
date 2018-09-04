@@ -8,7 +8,17 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
-var urlDatabase = {
+const generateRandomString = function() {
+
+  let randomString = "";
+  randomString += Math.random().toString(36).substring(2, 8);
+
+  return randomString;
+}
+
+
+
+const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
@@ -24,6 +34,15 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  let shortURL = generateRandomString();
+  urlDatabase[shortURL] = req.body["longURL"];
+
+  // console.log(req.body["longURL"]);
+  // console.log(urlDatabase);// debug statement to see POST parameters
+  res.send(`Shortened ${req.body["longURL"]} to ${shortURL}`);         // Redirect to the page for the new short URL
 });
 
 app.get("/urls/new", (req, res) => {

@@ -6,12 +6,9 @@
   </head>
 
   <body>
-      <h3>URL Database</h3>
+      <h3>Requested URL:</h3>
       <ul>
-        <% for(shortURL in urls) { %>
-          <li><%=shortURL%> - <%=urls[shortURL]%></li>
-
-        <% }; %>
+          <li><%=shortURL%> - <%=fullURL%></li>
       </ul>
 
       <h4>Shorten a New Link</h4>
@@ -20,6 +17,3 @@
   </body>
 
 </html>
-
-
-

@@ -1,0 +1,15 @@
+{
+  "name": "tiny_app",
+  "version": "1.0.0",
+  "description": "TinyApp URL shortening project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Emily McMinn",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^2.6.1",
+    "express": "^4.16.3"
+  }
+}

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <title>TinyApp</title>
+  </head>
+
+  <body>
+      <h3>URL Database</h3>
+      <ul>
+        <% for(short in urls) { %>
+          <li><%=short%> - <%=urls[short]%></li>
+
+        <% }; %>
+      </ul>
+
+      <h4>Shorten a New Link</h4>
+      <a href='#'>Shorten</a>
+
+  </body>
+
+</html>
+
+
+

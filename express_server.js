@@ -8,6 +8,8 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
+
+//generates a 6 character alphanumeric string
 const generateRandomString = function() {
 
   let randomString = "";
@@ -44,6 +46,16 @@ app.post("/urls", (req, res) => {
   // console.log(urlDatabase);// debug statement to see POST parameters
   res.redirect(302,`http://localhost:8080/urls/${shortURL}`);// Redirect to the page for the new short URL
 });
+
+//deletes a url from the database
+app.post("/urls/:id/delete", (req, res) => {
+
+  //console.log(req.params.id); debug statements to verify the delete operator
+  delete urlDatabase[req.params.id];
+  //console.log(urlDatabase);
+
+  res.redirect(302, "/urls");
+})
 
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");

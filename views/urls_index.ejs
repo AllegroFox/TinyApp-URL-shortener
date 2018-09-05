@@ -11,10 +11,15 @@
       <h3>URL Database</h3>
       <ul>
         <% for(shortURL in urls) { %>
-          <li><%=shortURL%> - <%=urls[shortURL]%></li>
+          <li><%=shortURL%> - <%=urls[shortURL]%>
+            <form method="POST" action="/urls/<%= shortURL%>/delete">
+              <input type="submit" value="Remove URL">
+            </form>
+          </li>
 
         <% }; %>
       </ul>
+
 
       <h4>Shorten a New Link</h4>
       <a href='#'>Shorten</a>

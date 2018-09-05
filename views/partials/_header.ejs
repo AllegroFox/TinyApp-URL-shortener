@@ -1,9 +1,19 @@
 
 <title>TinyApp URL Shortener</title>
 
-<form method="POST" action="/login">
-  <input type="text" name= "username" value="login">
-</form>
+<% if (username) { %>
+  <h5>Logged is as: <%=username%></h5>
+  <form method="POST" action="/logout">
+    <input type="submit" value="logout">
+  </form>
+
+<% } else { %>
+
+  <form method="POST" action="/login">
+    <input type="text" name= "username" value="login">
+  </form>
+
+<% } %>
 
 
 

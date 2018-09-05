@@ -43,7 +43,7 @@ const users = {
 };
 
 
-
+//stores urls and the associated shortURLs
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -64,15 +64,30 @@ app.get("/register", (req, res) => {
   res.render("urls_register");
 });
 
-
+//verify that email & password fields are filled and email doesn't already exist
+//if email is new & password exists, register a new user
 app.post("/register", (req, res) => {
   let randomID = generateRandomString();
-  users[randomID] = {id: randomID, email: req.body["email"], password: req.body["password"]};
 
-  res.cookie('userID', randomID);
-  // console.log(users);// debug statement to see updated user object
-  res.redirect(302,"/urls");
+  if (!req.body["email"] || !req.body["password"]) {
+
+    res.status(400).send("Please fill out the email and password fields.");
+
+  } else if (Object.values(users).map(user => user.email).includes(req.body["email"])) {
+
+    res.status(400).send("Someone has already used that email. Please choose another!")
+
+  } else {
+
+    users[randomID] = {id: randomID, email: req.body["email"], password: req.body["password"]};
+    res.cookie('userID', randomID);
+    //console.log(users);// debug statement to see updated user object
+    res.redirect(302,"/urls");
+
+  }
+
 });
+
 
 
 app.get("/urls", (req, res) => {

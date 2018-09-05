@@ -18,7 +18,29 @@ const generateRandomString = function() {
   randomString += Math.random().toString(36).substring(2, 8);
 
   return randomString;
-}
+};
+
+
+//stores user information
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  },
+
+  "foxyOverlord": {
+    id: "foxyOverlord",
+    email: "emily@example.com",
+    password: "correct-horse-battery-staple"
+  }
+};
 
 
 
@@ -38,6 +60,21 @@ app.get("/urls.json", (req, res) => {
 });
 
 
+app.get("/register", (req, res) => {
+  res.render("urls_register");
+});
+
+
+app.post("/register", (req, res) => {
+  let randomID = generateRandomString();
+  users[randomID] = {id: randomID, email: req.body["email"], password: req.body["password"]};
+
+  res.cookie('userID', randomID);
+  // console.log(users);// debug statement to see updated user object
+  res.redirect(302,"/urls");
+});
+
+
 app.get("/urls", (req, res) => {
   let templateVars = { username: req.cookies["username"], urls: urlDatabase };
   res.render("urls_index", templateVars);
@@ -45,9 +82,9 @@ app.get("/urls", (req, res) => {
 
 
 app.post("/login", (req, res) => {
-  console.log(req.body["username"]);
+  //console.log(req.body["username"]);
   res.cookie('username', req.body["username"]);
-  console.log('Cookies: ', req.cookies);
+  //console.log('Cookies: ', req.cookies);
   res.redirect(302, "/urls");
 });
 

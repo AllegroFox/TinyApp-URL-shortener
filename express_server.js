@@ -57,6 +57,7 @@ app.post("/urls/:id/delete", (req, res) => {
   res.redirect(302, "/urls");
 })
 
+
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
@@ -64,6 +65,15 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let templateVars = { shortURL: req.params.id, fullURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
+});
+
+app.post("/urls/:id", (req, res) => {
+
+  // console.log(req.body.newURL); // debugging form input
+  // console.log(req.params);
+
+  urlDatabase[req.params.id] = req.body.newURL
+  res.redirect(302, `${req.params.id}`);
 });
 
 app.get("/u/:shortURL", (req, res) => {

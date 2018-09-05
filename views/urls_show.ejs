@@ -11,8 +11,8 @@
       <h3>Requested URL:</h3>
       <ul>
           <li><%=shortURL%> - <%=fullURL%></li>
-          <form method="POST" action="/urls/<%= shortURL%>/update">
-              Update This URL:<input type="text" value = "New URL Destination">
+          <form method="POST" action="/urls/<%= shortURL%>">
+              Update This URL:<input type="text" name = "newURL" value = "New URL Destination">
               <input type="submit" value="Update">
             </form>
       </ul>

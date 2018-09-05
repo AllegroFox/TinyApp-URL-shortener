@@ -12,7 +12,7 @@
       <ul>
           <li><%=shortURL%> - <%=fullURL%></li>
           <form method="POST" action="/urls/<%= shortURL%>">
-              Update This URL:<input type="text" name = "newURL" value = "New URL Destination">
+              Update This URL:<input type="url" name = "newURL" value = "New URL Destination">
               <input type="submit" value="Update">
             </form>
       </ul>

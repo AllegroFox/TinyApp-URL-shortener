@@ -25,18 +25,22 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
 });
+
 
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
@@ -55,17 +59,19 @@ app.post("/urls/:id/delete", (req, res) => {
   //console.log(urlDatabase);
 
   res.redirect(302, "/urls");
-})
+});
 
 
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+
 app.get("/urls/:id", (req, res) => {
   let templateVars = { shortURL: req.params.id, fullURL: urlDatabase[req.params.id] };
   res.render("urls_show", templateVars);
 });
+
 
 app.post("/urls/:id", (req, res) => {
 
@@ -76,6 +82,12 @@ app.post("/urls/:id", (req, res) => {
   res.redirect(302, `${req.params.id}`);
 });
 
+
+app.post("/urls/:id/edit", (req, res) => {
+  res.redirect(302,`http://localhost:8080/urls/${shortURL}`);
+});
+
+
 app.get("/u/:shortURL", (req, res) => {
   let longURL = urlDatabase[req.params.shortURL];
   res.redirect(302, longURL);
@@ -85,6 +97,7 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/hello", (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

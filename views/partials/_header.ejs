@@ -2,7 +2,7 @@
 <title>TinyApp URL Shortener</title>
 
 <% if (user) { %>
-  <h5>Logged in as: <%=user.id%></h5>
+  <h5>Logged in as: <%=user.email%></h5>
   <form method="POST" action="/logout">
     <input type="submit" value="logout">
   </form>

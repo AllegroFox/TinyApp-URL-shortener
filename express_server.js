@@ -63,17 +63,26 @@ const users = {
 };
 
 
-//stores urls and the associated shortURLs
+//stores shortURLs, the associated longURLs and the associated userID
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "foxyOverlord"
+  },
+
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "foxyOverlord"
+  }
 };
 
 
 //all routing functions below
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+
+  let templateVars = { user: users[req.cookies["userID"]]};
+  res.render("home", templateVars);
 });
 
 
@@ -81,6 +90,10 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
+
+
+
+//registration, login/logout
 
 app.get("/register", (req, res) => {
   res.render("urls_register");
@@ -111,21 +124,11 @@ app.post("/register", (req, res) => {
 });
 
 
-
-app.get("/urls", (req, res) => {
-  let templateVars = { user: users[req.cookies["userID"]], urls: urlDatabase };
-  console.log(templateVars);
-  res.render("urls_index", templateVars);
-});
-
-
 app.get("/login", (req, res) => {
   res.render("login");
 });
 
-
 app.post("/login", (req, res) => {
-  //let userID = users[req.cookies["userID"]];
 
   if (!req.body["email"] || !req.body["password"]) {
 
@@ -157,9 +160,7 @@ app.post("/login", (req, res) => {
 
   }
 
-
 });
-
 
 app.post("/logout", (req, res) => {
   res.clearCookie('userID');
@@ -167,44 +168,66 @@ app.post("/logout", (req, res) => {
 });
 
 
+
+
+//create, view, modify or delete URLS
+
+app.get("/urls", (req, res) => {
+  let templateVars = { user: users[req.cookies["userID"]], urls: urlDatabase };
+  res.render("urls_index", templateVars);
+});
+
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body["longURL"];
-
-  // console.log(req.body["longURL"]);
-  // console.log(urlDatabase);// debug statement to see POST parameters
+  urlDatabase[shortURL] = {longURL: req.body["longURL"], userID: req.cookies["userID"]}
   res.redirect(302,`http://localhost:8080/urls/${shortURL}`);// Redirect to the page for the new short URL
 });
 
 //deletes a url from the database
 app.post("/urls/:id/delete", (req, res) => {
 
-  //console.log(req.params.id); debug statements to verify the delete operator
-  delete urlDatabase[req.params.id];
-  //console.log(urlDatabase);
+  if (req.cookies["userID"] === urlDatabase[req.params.id]["userID"]) {
 
-  res.redirect(302, "/urls");
+    delete urlDatabase[req.params.id];
+    res.redirect(302, "/urls");
+  } else {
+    res.status(403).send("You don't have permission to delete that.")
+  }
 });
 
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let user = users[req.cookies["userID"]];
+  let templateVars = { user: users[req.cookies["userID"]]}
+  if (user) {
+    res.render("urls_new", templateVars);
+  } else {
+    res.redirect(302, "/login");
+  }
+
 });
 
 
 app.get("/urls/:id", (req, res) => {
-  let templateVars = { user: users[req.cookies["userID"]], shortURL: req.params.id, fullURL: urlDatabase[req.params.id] };
+
+  let shortURL = req.params.id;
+  let templateVars = { user: users[req.cookies["userID"]], shortURL: req.params.id, fullURL: urlDatabase[shortURL]["longURL"]};
   res.render("urls_show", templateVars);
 });
 
 
 app.post("/urls/:id", (req, res) => {
+  let shortURL = req.params.id;
 
-  // console.log(req.body.newURL); // debugging form input
-  // console.log(req.params);
+  if (req.cookies["userID"] === urlDatabase[req.params.id]["userID"]) {
 
-  urlDatabase[req.params.id] = req.body.newURL
-  res.redirect(302, `${req.params.id}`);
+    urlDatabase[shortURL]["longURL"] = req.body.newURL
+    res.redirect(302, `${req.params.id}`);
+
+  } else {
+    res.status(403).send("You don't have permission to edit that.")
+  }
+
 });
 
 
@@ -219,10 +242,9 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
 
+
+//console message at startup
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -230,3 +252,6 @@ app.listen(PORT, () => {
 
 
 
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });

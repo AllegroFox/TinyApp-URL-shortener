@@ -20,6 +20,26 @@ const generateRandomString = function() {
   return randomString;
 };
 
+//associates email with ID
+function findID(email) {
+ for(var id in users){
+   if(email === users[id].email){
+    return users[id].id;
+   }
+ }
+ return false
+};
+
+//associates ID with password
+function checkPass(password) {
+ for(var id in users){
+   if(password === users[id].password){
+    return users[id].password;
+   }
+ }
+ return false
+};
+
 
 //stores user information
 const users = {
@@ -38,7 +58,7 @@ const users = {
   "foxyOverlord": {
     id: "foxyOverlord",
     email: "emily@example.com",
-    password: "correct-horse-battery-staple"
+    password: "asdf"
   }
 };
 
@@ -49,6 +69,8 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+
+//all routing functions below
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -65,7 +87,7 @@ app.get("/register", (req, res) => {
 });
 
 //verify that email & password fields are filled and email doesn't already exist
-//if email is new & password exists, register a new user
+//if email is new & password field is full, register a new user
 app.post("/register", (req, res) => {
   let randomID = generateRandomString();
 
@@ -97,18 +119,52 @@ app.get("/urls", (req, res) => {
 });
 
 
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+
 app.post("/login", (req, res) => {
-  //console.log(req.body["username"]);
-  res.cookie('userID', randomID);
-  //console.log('Cookies: ', req.cookies);
-  res.redirect(302, "/urls");
+  //let userID = users[req.cookies["userID"]];
+
+  if (!req.body["email"] || !req.body["password"]) {
+
+    res.status(400).send("Please fill out the email and password fields.");
+
+  } else if (!Object.values(users).map(user => user.email).includes(req.body["email"])) {
+
+    res.status(403).send("Invaild email or password.");
+
+  } else if (Object.values(users).map(user => user.email).includes(req.body["email"]))  {
+
+    let currentID = findID(req.body["email"]);
+    let currentPassword = checkPass(req.body["password"]);
+    console.log(currentID, currentPassword)
+
+      if (currentPassword === req.body["password"]) {
+
+        res.cookie('userID', currentID );
+
+        res.redirect(302,"/");
+
+      } else {
+        res.status(403).send("Invalid email or password.");
+      }
+
+  } else {
+
+    res.redirect(302,"/login");
+
+  }
+
+
 });
 
 
 app.post("/logout", (req, res) => {
   res.clearCookie('userID');
-  res.redirect(302, "/urls");
-})
+  res.redirect(302, "/");
+});
 
 
 app.post("/urls", (req, res) => {

@@ -9,8 +9,12 @@
 
 <% } else { %>
 
-  <form method="POST" action="/login">
-    <input type="text" name= "username" value="login">
+  <form method="GET" action="/login">
+    <input type="submit" value="login">
+  </form>
+
+  <form method="GET" action="/register">
+    <input type="submit" value="register">
   </form>
 
 <% } %>

@@ -17,8 +17,16 @@
           </form>
       </ul>
 
+      <form method="GET" action="/urls">
+        <input id="back" type="submit" value="Back to Database">
+      </form>
+
       <h4>Shorten a New Link</h4>
-      <a href='#'>Shorten</a>
+      <form action="/urls" method="POST" style="margin:150px;">
+        <label for="longURL">Enter a URL:</label>
+          <input id="longURL" type="text" name="longURL" placeholder="http://" style="width: 300px">
+        <input type="submit" value="Shorten">
+      </form>
 
   </body>
 

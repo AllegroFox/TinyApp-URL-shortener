@@ -40,6 +40,15 @@ function checkPass(password) {
  return false
 };
 
+//filters URLS to show only URLS associated with the user
+function urlsForUser(id) {
+  const userList = {}
+  for (let url in urlDatabase){
+    if (id === urlDatabase[url]["userID"])
+      userList[url] = urlDatabase[url];
+  }
+    return userList;
+};
 
 //stores user information
 const users = {
@@ -67,7 +76,7 @@ const users = {
 const urlDatabase = {
   "b2xVn2": {
     longURL: "http://www.lighthouselabs.ca",
-    userID: "foxyOverlord"
+    userID: "userRandomID"
   },
 
   "9sm5xK": {
@@ -173,8 +182,14 @@ app.post("/logout", (req, res) => {
 //create, view, modify or delete URLS
 
 app.get("/urls", (req, res) => {
-  let templateVars = { user: users[req.cookies["userID"]], urls: urlDatabase };
+  let id = req.cookies["userID"];
+  //console.log(req.cookies["userID"]);
+  let templateVars = { user: users[req.cookies["userID"]], urls: urlsForUser(id) };
+  if (id) {
   res.render("urls_index", templateVars);
+} else {
+  res.redirect(302, "/login");
+}
 });
 
 app.post("/urls", (req, res) => {
@@ -209,10 +224,15 @@ app.get("/urls/new", (req, res) => {
 
 
 app.get("/urls/:id", (req, res) => {
-
+  let user = users[req.cookies["userID"]];
   let shortURL = req.params.id;
   let templateVars = { user: users[req.cookies["userID"]], shortURL: req.params.id, fullURL: urlDatabase[shortURL]["longURL"]};
-  res.render("urls_show", templateVars);
+
+  if (req.cookies["userID"] === urlDatabase[req.params.id]["userID"]) {
+    res.render("urls_show", templateVars);
+  } else {
+    res.status(403).send("You don't have permission to view that.")
+  }
 });
 
 
@@ -237,7 +257,7 @@ app.post("/urls/:id/edit", (req, res) => {
 
 
 app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL];
+  let longURL = urlDatabase[req.params.shortURL]["longURL"];
   res.redirect(302, longURL);
 });
 

@@ -4,6 +4,7 @@ const express = require("express");
 const app = express();
 const cookieParser = require('cookie-parser');
 const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
 const PORT = 8080; // default port 8080
 
 app.use(bodyParser.urlencoded({extended: true}));
@@ -123,7 +124,8 @@ app.post("/register", (req, res) => {
 
   } else {
 
-    users[randomID] = {id: randomID, email: req.body["email"], password: req.body["password"]};
+    let password = req.body["password"];
+    users[randomID] = {id: randomID, email: req.body["email"], password: bcrypt.hashSync(password, 10)};
     res.cookie('userID', randomID);
     //console.log(users);// debug statement to see updated user object
     res.redirect(302,"/urls");
@@ -150,10 +152,11 @@ app.post("/login", (req, res) => {
   } else if (Object.values(users).map(user => user.email).includes(req.body["email"]))  {
 
     let currentID = findID(req.body["email"]);
-    let currentPassword = checkPass(req.body["password"]);
-    console.log(currentID, currentPassword)
+    let currentPassword = req.body["password"];
+    let hashedPassword = bcrypt.hashSync(currentPassword, 10);
+    console.log(currentID, currentPassword, hashedPassword);
 
-      if (currentPassword === req.body["password"]) {
+      if (bcrypt.compareSync(currentPassword, hashedPassword)) {
 
         res.cookie('userID', currentID );
 
@@ -183,13 +186,12 @@ app.post("/logout", (req, res) => {
 
 app.get("/urls", (req, res) => {
   let id = req.cookies["userID"];
-  //console.log(req.cookies["userID"]);
   let templateVars = { user: users[req.cookies["userID"]], urls: urlsForUser(id) };
   if (id) {
-  res.render("urls_index", templateVars);
-} else {
-  res.redirect(302, "/login");
-}
+    res.render("urls_index", templateVars);
+  } else {
+    res.redirect(302, "/login");
+  }
 });
 
 app.post("/urls", (req, res) => {
@@ -205,6 +207,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
     delete urlDatabase[req.params.id];
     res.redirect(302, "/urls");
+
   } else {
     res.status(403).send("You don't have permission to delete that.")
   }
@@ -214,6 +217,7 @@ app.post("/urls/:id/delete", (req, res) => {
 app.get("/urls/new", (req, res) => {
   let user = users[req.cookies["userID"]];
   let templateVars = { user: users[req.cookies["userID"]]}
+
   if (user) {
     res.render("urls_new", templateVars);
   } else {
@@ -233,6 +237,7 @@ app.get("/urls/:id", (req, res) => {
   } else {
     res.status(403).send("You don't have permission to view that.")
   }
+
 });
 
 
@@ -270,8 +275,3 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-
-
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });

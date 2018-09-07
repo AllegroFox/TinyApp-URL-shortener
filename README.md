@@ -23,5 +23,5 @@ Users can register in order to keep a list of shortened URLs that only they can 
 ## Using TinyApp
 
 - Register using an email and password.
-- Links will be shortened to a random 6-character alphanumeric string. Original pages can be accessed at the address 'http://localhost:8080/u/<shortURL>', where <shortURL> is replaced by the associated 6-character string.
+- Links will be shortened to a random 6-character alphanumeric string. Original pages can be accessed at the address 'http://localhost:8080/u/`<shortURL>`', where `<shortURL>` is replaced by the associated 6-character string.
 

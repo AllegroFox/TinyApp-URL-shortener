@@ -2,13 +2,16 @@
 
 const express = require("express");
 const app = express();
-const cookieParser = require('cookie-parser');
+const cookieSession = require("cookie-session");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const PORT = 8080; // default port 8080
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['kuuq38yab']
+}));
 app.set("view engine", "ejs");
 
 
@@ -91,7 +94,7 @@ const urlDatabase = {
 
 app.get("/", (req, res) => {
 
-  let templateVars = { user: users[req.cookies["userID"]]};
+  let templateVars = { user: users[req.session.userID]};
   res.render("home", templateVars);
 });
 
@@ -126,8 +129,8 @@ app.post("/register", (req, res) => {
 
     let password = req.body["password"];
     users[randomID] = {id: randomID, email: req.body["email"], password: bcrypt.hashSync(password, 10)};
-    res.cookie('userID', randomID);
-    //console.log(users);// debug statement to see updated user object
+    req.session.userID = randomID;
+
     res.redirect(302,"/urls");
 
   }
@@ -138,6 +141,7 @@ app.post("/register", (req, res) => {
 app.get("/login", (req, res) => {
   res.render("login");
 });
+
 
 app.post("/login", (req, res) => {
 
@@ -154,16 +158,17 @@ app.post("/login", (req, res) => {
     let currentID = findID(req.body["email"]);
     let currentPassword = req.body["password"];
     let hashedPassword = bcrypt.hashSync(currentPassword, 10);
-    console.log(currentID, currentPassword, hashedPassword);
 
       if (bcrypt.compareSync(currentPassword, hashedPassword)) {
 
-        res.cookie('userID', currentID );
+        req.session.userID = currentID;
 
         res.redirect(302,"/");
 
       } else {
+
         res.status(403).send("Invalid email or password.");
+
       }
 
   } else {
@@ -175,7 +180,7 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie('userID');
+  req.session = null;
   res.redirect(302, "/");
 });
 
@@ -185,25 +190,35 @@ app.post("/logout", (req, res) => {
 //create, view, modify or delete URLS
 
 app.get("/urls", (req, res) => {
-  let id = req.cookies["userID"];
-  let templateVars = { user: users[req.cookies["userID"]], urls: urlsForUser(id) };
+  let id = req.session.userID;
+  let templateVars = { user: users[req.session.userID], urls: urlsForUser(id) };
+
   if (id) {
     res.render("urls_index", templateVars);
   } else {
     res.redirect(302, "/login");
   }
+
 });
 
+
 app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString();
-  urlDatabase[shortURL] = {longURL: req.body["longURL"], userID: req.cookies["userID"]}
-  res.redirect(302,`http://localhost:8080/urls/${shortURL}`);// Redirect to the page for the new short URL
+  let id = req.session.userID;
+
+  if (id) {
+    let shortURL = generateRandomString();
+    urlDatabase[shortURL] = {longURL: req.body["longURL"], userID: req.session.userID}
+    res.redirect(302,`http://localhost:8080/urls/${shortURL}`);// Redirect to the page for the new short URL
+  } else {
+    res.redirect(302, "/login");
+  }
+
 });
 
 //deletes a url from the database
 app.post("/urls/:id/delete", (req, res) => {
 
-  if (req.cookies["userID"] === urlDatabase[req.params.id]["userID"]) {
+  if (req.session.userID === urlDatabase[req.params.id]["userID"]) {
 
     delete urlDatabase[req.params.id];
     res.redirect(302, "/urls");
@@ -211,12 +226,13 @@ app.post("/urls/:id/delete", (req, res) => {
   } else {
     res.status(403).send("You don't have permission to delete that.")
   }
+
 });
 
 
 app.get("/urls/new", (req, res) => {
-  let user = users[req.cookies["userID"]];
-  let templateVars = { user: users[req.cookies["userID"]]}
+  let user = users[req.session.userID];
+  let templateVars = { user: users[req.session.userID]}
 
   if (user) {
     res.render("urls_new", templateVars);
@@ -228,11 +244,11 @@ app.get("/urls/new", (req, res) => {
 
 
 app.get("/urls/:id", (req, res) => {
-  let user = users[req.cookies["userID"]];
+  let user = users[req.session.userID];
   let shortURL = req.params.id;
-  let templateVars = { user: users[req.cookies["userID"]], shortURL: req.params.id, fullURL: urlDatabase[shortURL]["longURL"]};
+  let templateVars = { user: users[req.session.userID], shortURL: req.params.id, fullURL: urlDatabase[shortURL]["longURL"]};
 
-  if (req.cookies["userID"] === urlDatabase[req.params.id]["userID"]) {
+  if (req.session.userID === urlDatabase[req.params.id]["userID"]) {
     res.render("urls_show", templateVars);
   } else {
     res.status(403).send("You don't have permission to view that.")
@@ -244,7 +260,7 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   let shortURL = req.params.id;
 
-  if (req.cookies["userID"] === urlDatabase[req.params.id]["userID"]) {
+  if (req.session.userID === urlDatabase[req.params.id]["userID"]) {
 
     urlDatabase[shortURL]["longURL"] = req.body.newURL
     res.redirect(302, `${req.params.id}`);

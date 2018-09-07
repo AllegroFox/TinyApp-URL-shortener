@@ -6,6 +6,10 @@ Users can register in order to keep a list of shortened URLs that only they can 
 
 ## Final Product
 
+!["Screenshot of registration page"](https://raw.githubusercontent.com/AllegroFox/TinyApp-URL-shortener/master/docs/registration-page.png)
+
+!["Screenshot of URLs database"](https://raw.githubusercontent.com/AllegroFox/TinyApp-URL-shortener/master/docs/sample-url-database.png)
+
 ## Dependencies
 
 - Node.js

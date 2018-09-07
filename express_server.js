@@ -95,9 +95,14 @@ const urlDatabase = {
 //all routing functions below
 
 app.get("/", (req, res) => {
-
+  let id = req.session.userID;
   let templateVars = { user: users[req.session.userID]};
-  res.render("home", templateVars);
+
+  if (id) {
+    res.render("home", templateVars);
+  } else {
+    res.redirect(302,"/login");
+  }
 });
 
 
@@ -246,14 +251,22 @@ app.get("/urls/new", (req, res) => {
 
 
 app.get("/urls/:id", (req, res) => {
-  let user = users[req.session.userID];
   let shortURL = req.params.id;
+
+  if (Object.keys(urlDatabase).includes(shortURL)) {
+  let user = users[req.session.userID];
   let templateVars = { user: users[req.session.userID], shortURL: req.params.id, fullURL: urlDatabase[shortURL]["longURL"]};
 
-  if (req.session.userID === urlDatabase[req.params.id]["userID"]) {
-    res.render("urls_show", templateVars);
+    if (req.session.userID === urlDatabase[req.params.id]["userID"]) {
+      res.render("urls_show", templateVars);
+    } else {
+      res.status(403).send("You don't have permission to view that.");
+    }
+
   } else {
-    res.status(403).send("You don't have permission to view that.")
+
+    res.status(404).send("Sorry, that URL doesn't exist.")
+
   }
 
 });
@@ -275,6 +288,7 @@ app.put("/urls/:id", (req, res) => {
 
 
 app.post("/urls/:id/edit", (req, res) => {
+  let shortURL = req.params.id;
   res.redirect(302,`http://localhost:8080/urls/${shortURL}`);
 });
 

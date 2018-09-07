@@ -2,11 +2,13 @@
 
 const express = require("express");
 const app = express();
+const methodOverride = require('method-override')
 const cookieSession = require("cookie-session");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const PORT = 8080; // default port 8080
 
+app.use(methodOverride('_method'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
   name: 'session',
@@ -216,7 +218,7 @@ app.post("/urls", (req, res) => {
 });
 
 //deletes a url from the database
-app.post("/urls/:id/delete", (req, res) => {
+app.delete("/urls/:id/delete", (req, res) => {
 
   if (req.session.userID === urlDatabase[req.params.id]["userID"]) {
 
@@ -257,7 +259,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
   let shortURL = req.params.id;
 
   if (req.session.userID === urlDatabase[req.params.id]["userID"]) {

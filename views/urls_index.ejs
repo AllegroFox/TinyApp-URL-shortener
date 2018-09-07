@@ -15,7 +15,7 @@
             <form method="POST" action= "/urls/<%=shortURL%>/edit">
               <input type="submit" value="Edit">
             </form>
-            <form method="POST" action= "/urls/<%= shortURL%>/delete">
+            <form method="POST" action= "/urls/<%= shortURL%>/delete?_method=DELETE">
               <input type="submit" value="Remove URL">
             </form>
           </li>

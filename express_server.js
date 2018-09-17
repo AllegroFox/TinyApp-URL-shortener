@@ -28,22 +28,22 @@ const generateRandomString = function() {
 
 //associates email with ID
 function findID(email) {
- for(var id in users){
+ for(let id in users){
    if(email === users[id].email){
     return users[id].id;
    }
  }
- return false
+ return false;
 };
 
 //associates ID with password
 function checkPass(password) {
- for(var id in users){
-   if(password === users[id].password){
-    return users[id].password;
+ for(let id in users){
+   if(bcrypt.compareSync(password, users[id].password)){
+    return true;
    }
  }
- return false
+ return false;
 };
 
 //filters URLS to show only URLS associated with the user
@@ -61,19 +61,19 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("purple-monkey-dinosaur", 10)
   },
 
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: bcrypt.hashSync("dishwasher-funk", 10)
   },
 
   "foxyOverlord": {
     id: "foxyOverlord",
     email: "emily@example.com",
-    password: "asdf"
+    password: bcrypt.hashSync("asdf", 10)
   }
 };
 
@@ -130,7 +130,7 @@ app.post("/register", (req, res) => {
 
   } else if (Object.values(users).map(user => user.email).includes(req.body["email"])) {
 
-    res.status(400).send("Someone has already used that email. Please choose another!")
+    res.status(400).send("Someone has already used that email. Please choose another!");
 
   } else {
 
@@ -164,9 +164,8 @@ app.post("/login", (req, res) => {
 
     let currentID = findID(req.body["email"]);
     let currentPassword = req.body["password"];
-    let hashedPassword = bcrypt.hashSync(currentPassword, 10);
 
-      if (bcrypt.compareSync(currentPassword, hashedPassword)) {
+      if (checkPass(currentPassword)) {
 
         req.session.userID = currentID;
 
@@ -231,7 +230,7 @@ app.delete("/urls/:id/delete", (req, res) => {
     res.redirect(302, "/urls");
 
   } else {
-    res.status(403).send("You don't have permission to delete that.")
+    res.status(403).send("You don't have permission to delete that.");
   }
 
 });
@@ -239,7 +238,7 @@ app.delete("/urls/:id/delete", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   let user = users[req.session.userID];
-  let templateVars = { user: users[req.session.userID]}
+  let templateVars = { user: users[req.session.userID]};
 
   if (user) {
     res.render("urls_new", templateVars);
@@ -265,7 +264,7 @@ app.get("/urls/:id", (req, res) => {
 
   } else {
 
-    res.status(404).send("Sorry, that URL doesn't exist.")
+    res.status(404).send("Sorry, that URL doesn't exist.");
 
   }
 
@@ -277,11 +276,11 @@ app.put("/urls/:id", (req, res) => {
 
   if (req.session.userID === urlDatabase[req.params.id]["userID"]) {
 
-    urlDatabase[shortURL]["longURL"] = req.body.newURL
+    urlDatabase[shortURL]["longURL"] = req.body.newURL;
     res.redirect(302, `${req.params.id}`);
 
   } else {
-    res.status(403).send("You don't have permission to edit that.")
+    res.status(403).send("You don't have permission to edit that.");
   }
 
 });
